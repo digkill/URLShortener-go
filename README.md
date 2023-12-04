@@ -1,0 +1,1 @@
+# URLShortener GO service for shortcut link
