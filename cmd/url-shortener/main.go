@@ -2,6 +2,11 @@ package main
 
 import (
 	"URLShortener/internal/config"
+	mwLogger "URLShortener/internal/http-server/middleware/logger"
+	"URLShortener/internal/lib/logger/sl"
+	"URLShortener/internal/storage/sqlite"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"log/slog"
 	"os"
 )
@@ -20,6 +25,21 @@ func main() {
 
 	log.Info("initializing server", slog.String("address", cfg.Address))
 	log.Debug("logger debug mode enabled")
+
+	storage, err := sqlite.New(cfg.StoragePath)
+	if err != nil {
+		log.Error("failed to initialize storage", sl.Err(err))
+	}
+
+	router := chi.NewRouter()
+
+	router.Use(middleware.RequestID)
+	router.Use(middleware.Logger)
+
+	router.Use(mwLogger.New(log))
+
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.URLFormat)
 }
 
 func setupLogger(env string) *slog.Logger {
