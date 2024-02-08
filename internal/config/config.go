@@ -20,17 +20,20 @@ type HTTPServer struct {
 }
 
 func MustLoad() *Config {
+	// Path for config-file from env-variable CONFIG_PATH
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
 		log.Fatal("CONFIG_PATH environment variable is not set")
 	}
 
+	// Checking the existence of the config file
 	if _, err := os.Stat(configPath); err != nil {
 		log.Fatalf("error opening config file: %s", err)
 	}
 
 	var cfg Config
 
+	// Reading the config file and filling the struct
 	err := cleanenv.ReadConfig(configPath, &cfg)
 	if err != nil {
 		log.Fatalf("error reading config file: %s", err)
